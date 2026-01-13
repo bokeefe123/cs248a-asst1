@@ -44,7 +44,24 @@ public float4 sample(float2 uv, RendererUniform uniforms)
     RayHitResult result;
 
     // TODO: Student implementation starts here.
-
+    Optional<RayHitResult> closestHitResult;
+    Optional<RayHitResult> hitResult;
+    for (uint i = 0; i < uniforms.triangleCount; i++)
+    {
+        Triangle triangle = uniforms.triangleBuf[i];
+        hitResult = triangle.hit(ray);
+        if (!hitResult.hasValue) {}
+        else if (!closestHitResult.hasValue) {
+            closestHitResult = hitResult;
+        }
+        else if (hitResult.value.t < closestHitResult.value.t) {
+            closestHitResult = hitResult;
+        }  
+    }
+    if (!closestHitResult.hasValue) {
+        return float4(float3(0.0), 1.0);
+    }
+    result = closestHitResult.value;
     // TODO: Student implementation ends here.
 
     if (uniforms.renderDepth)
