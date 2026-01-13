@@ -34,7 +34,7 @@ public struct Triangle : IRayCastable
         float beta = length(cross(p - vertices[2], p - vertices[0])) / (triangleArea);
         float gamma = length(cross(p - vertices[0], p - vertices[1])) / (triangleArea);
         if (alpha >= 0 && alpha <= 1 && beta >= 0 && beta <= 1 && gamma >= 0 && gamma <= 1 && abs(alpha + beta + gamma - 1.0) < 1e-6) {
-            return Optional<RayHitResult>(RayHitResult(t, float3(alpha, beta, gamma)));
+            return Optional<RayHitResult>(RayHitResult(t, normalVector));
         } 
 
         return Optional<RayHitResult>();
