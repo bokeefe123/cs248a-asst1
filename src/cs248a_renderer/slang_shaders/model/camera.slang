@@ -23,7 +23,7 @@ public struct Camera
         // float adjustedX = (uv.x * focalLength);
         // float adjustedY = (uv.y * focalLength);
 
-        return Ray(float3(0, 0, 0), normalize(float3(scaledUV.x, scaledUV.y, -focalLength)));
+        return Ray(float3(0, 0, 0), normalize(float3(scaledUV.x, scaledUV.y, -focalLength))).transform(invViewMatrix);
 
         // TODO: Student implementation ends here.
     }
