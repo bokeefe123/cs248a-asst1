@@ -25,7 +25,8 @@ public struct SharedTexture3DBuffer<T>
     {
         // TODO: Student implementation starts here.
 
-        return T(0);
+        uint3 voxelCoord = uint3(uvw * tex.size);
+        return getBufferValue(tex, voxelCoord);
 
         // TODO: Student implementation ends here.
     }
@@ -39,9 +40,19 @@ public struct SharedTexture3DBuffer<T>
     public T trilinearSample(SharedTexture3D tex, float3 uvw)
     {
         // TODO: Student implementation starts here.
-
-        return T(0);
-
+        float3 baseVoxelCoord = uvw * float3(tex.size);
+        T sample = T(0);
+        for (float i = -0.5; i < 1; i+=0.5) {
+            for (float j = -0.5; j < 1; j+=0.5) {
+                for (float k = -0.5; k < 1; k+=0.5) {
+                    if (i == 0.0 && j == 0.0 && k == 0.0) {
+                        continue;
+                    }
+                    sample = sample.add(pointSample(tex, float3((baseVoxelCoord.x + i), (baseVoxelCoord.y + j), (baseVoxelCoord.z + k)) / tex.size)).div(T(8));
+                }
+            }
+        }
+        return sample
         // TODO: Student implementation ends here.
     }
 }
