@@ -25,7 +25,14 @@ public struct Volume
     public Optional<RayHitResult> hit(Ray ray, SharedTexture3DBuffer<float4> volumeTexBuf)
     {
         // TODO: Student implementation starts here.
-
+        for (float t = ray.tRange[0]; t <= ray.tRange[1]; t += STEP_SIZE) {
+            float3 p = ray.origin + t * ray.direction;
+            float3 uvw = getUVW(p);
+            float4 sample = volumeTexBuf.trilinearSample(tex, uvw);
+            if (sample.w > DENSITY_THRESHOLD) {
+                return Optional<RayHitResult>(RayHitResult(t, sample.xyz));
+            }
+        }
         // TODO: Student implementation ends here.
 
         return Optional<RayHitResult>();

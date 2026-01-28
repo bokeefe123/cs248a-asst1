@@ -15,6 +15,10 @@ public struct SharedTexture3DBuffer<T>
         return buffer[offset + index];
     }
 
+    T lerp(T a, T b, float s) { 
+        return a.mul(T(1.0 - s)).add(b.mul(T(s))); 
+    }
+
     /**
      * Sample the texture at the given uvw coordinates using nearest neighbor interpolation.
      * @param tex The texture to sample.
@@ -40,19 +44,39 @@ public struct SharedTexture3DBuffer<T>
     public T trilinearSample(SharedTexture3D tex, float3 uvw)
     {
         // TODO: Student implementation starts here.
-        float3 baseVoxelCoord = uvw * float3(tex.size);
-        T sample = T(0);
-        for (float i = -0.5; i < 1; i+=0.5) {
-            for (float j = -0.5; j < 1; j+=0.5) {
-                for (float k = -0.5; k < 1; k+=0.5) {
-                    if (i == 0.0 && j == 0.0 && k == 0.0) {
-                        continue;
-                    }
-                    sample = sample.add(pointSample(tex, float3((baseVoxelCoord.x + i), (baseVoxelCoord.y + j), (baseVoxelCoord.z + k)) / tex.size)).div(T(8));
-                }
-            }
-        }
-        return sample
+        
+        float3 voxelCenter = uvw * float3(tex.size);
+        uint3 baseVoxelCoord = uint3(max(float3(0), floor(voxelCenter)));
+        float3 t = voxelCenter - float3(baseVoxelCoord);
+        return lerp(
+            lerp(
+                lerp(
+                    getBufferValue(tex, baseVoxelCoord + uint3(0, 0, 0)),
+                    getBufferValue(tex, baseVoxelCoord + uint3(1, 0, 0)),
+                    t.x
+                ),
+                lerp(
+                    getBufferValue(tex, baseVoxelCoord + uint3(0, 1, 0)),
+                    getBufferValue(tex, baseVoxelCoord + uint3(1, 1, 0)),
+                    t.x
+                ),
+                t.y
+            ),
+            lerp(
+                lerp(
+                    getBufferValue(tex, baseVoxelCoord + uint3(0, 0, 1)),
+                    getBufferValue(tex, baseVoxelCoord + uint3(1, 0, 1)),
+                    t.x
+                ),
+                lerp(
+                    getBufferValue(tex, baseVoxelCoord + uint3(0, 1, 1)),
+                    getBufferValue(tex, baseVoxelCoord + uint3(1, 1, 1)),
+                    t.x
+                ),
+                t.y
+            ),
+            t.z
+        );
         // TODO: Student implementation ends here.
     }
 }
