@@ -48,18 +48,26 @@ public float4 sample(float2 uv, RendererUniform uniforms)
     Optional<RayHitResult> closestHitResult;
     Optional<RayHitResult> hitResult;
     
-    for (uint i = 0; i < uniforms.triangleCount; i++)
-    {
-        Triangle triangle = uniforms.triangleBuf[i];
-        hitResult = triangle.hit(ray);
-        if (!hitResult.hasValue) {}
-        else if (!closestHitResult.hasValue) {
-            closestHitResult = hitResult;
+    if (uniforms.useBVH) {
+        Optional<BVH<Triangle>.HitResult> bvhHitResult = uniforms.bvh.hit(ray);
+        if (bvhHitResult.hasValue) {
+            closestHitResult = Optional<RayHitResult>(bvhHitResult.value.rayHitResult);
         }
-        else if (hitResult.value.t < closestHitResult.value.t) {
-            closestHitResult = hitResult;
-        }  
+    } else {
+        for (uint i = 0; i < uniforms.triangleCount; i++)
+        {
+            Triangle triangle = uniforms.triangleBuf[i];
+            hitResult = triangle.hit(ray);
+            if (!hitResult.hasValue) {}
+            else if (!closestHitResult.hasValue) {
+                closestHitResult = hitResult;
+            }
+            else if (hitResult.value.t < closestHitResult.value.t) {
+                closestHitResult = hitResult;
+            }  
+        }
     }
+    
     
     for (uint i = 0; i < uniforms.volumeCount; i++)
     {

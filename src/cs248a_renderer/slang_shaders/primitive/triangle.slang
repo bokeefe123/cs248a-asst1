@@ -27,8 +27,8 @@ public struct Triangle : IRayCastable
         float triangleArea = length(normalVector);
         // normalVector = normalize(normalVector);
         float offset = dot(normalVector, vertices[0]);
-        float t = (offset - dot(normalVector, ray.origin)) / dot(normalVector, ray.direction);
-        float3 p = ray.origin + t * ray.direction;
+        float t = (offset - dot(normalVector, ray.origin)) / dot(normalVector, normalize(ray.direction));
+        float3 p = ray.origin + t * normalize(ray.direction);
 
         float alpha = length(cross(p - vertices[1], p - vertices[2])) / (triangleArea);
         float beta = length(cross(p - vertices[2], p - vertices[0])) / (triangleArea);

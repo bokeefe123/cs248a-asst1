@@ -29,6 +29,7 @@ public struct SharedTexture3DBuffer<T>
     {
         // TODO: Student implementation starts here.
 
+        uvw = clamp(uvw, float3(0.0), float3(1.0));
         uint3 voxelCoord = uint3(uvw * tex.size);
         return getBufferValue(tex, voxelCoord);
 
@@ -45,6 +46,7 @@ public struct SharedTexture3DBuffer<T>
     {
         // TODO: Student implementation starts here.
         
+        uvw = clamp(uvw, float3(0.0), float3(1.0));
         float3 voxelCenter = uvw * float3(tex.size);
         uint3 baseVoxelCoord = uint3(max(float3(0), floor(voxelCenter)));
         float3 t = voxelCenter - float3(baseVoxelCoord);
