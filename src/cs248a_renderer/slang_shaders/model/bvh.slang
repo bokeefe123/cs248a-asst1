@@ -110,7 +110,6 @@ public struct BVH<T>
             
             // Check if this is a leaf node
             if (currentNode.left == -1 && currentNode.right == -1) {
-                // Leaf node - test all primitives
                 for (uint i = currentNode.primLeft; i < currentNode.primRight; i++) {
                     rayHitResult = primitives[i].hit(ray);
                     if (rayHitResult.hasValue) {
@@ -122,7 +121,7 @@ public struct BVH<T>
                 }
             }
             else {
-                // Internal node - test children and add to stack
+                // Internal node
                 float2 leftNodeHit = nodes[currentNode.left].bound.hit(ray);
                 float2 rightNodeHit = nodes[currentNode.right].bound.hit(ray);
 
@@ -130,7 +129,6 @@ public struct BVH<T>
                 bool rightHits = (rightNodeHit.x != -1.0);
 
                 if (leftHits && rightHits) {
-                    // Both hit - push in order (closer first)
                     uint first = (leftNodeHit.x <= rightNodeHit.x) ? currentNode.left : currentNode.right;
                     uint second = (leftNodeHit.x <= rightNodeHit.x) ? currentNode.right : currentNode.left;
                     stack.push(second);
@@ -140,7 +138,6 @@ public struct BVH<T>
                 } else if (rightHits) {
                     stack.push(currentNode.right);
                 }
-                // If neither hits, don't push anything
             }
         }
 
