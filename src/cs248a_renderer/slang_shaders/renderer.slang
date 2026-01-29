@@ -40,12 +40,14 @@ public float4 sample(float2 uv, RendererUniform uniforms)
 {
     // We generate a camera ray for the given uv coordinate.
     // You need to implement the `generateRay` function in `Camera` struct in `src/cs248a_renderer/slang_shaders/model/camera.slang`
+    
     Ray ray = uniforms.camera.generateRay(uv);
     RayHitResult result;
 
     // TODO: Student implementation starts here.
     Optional<RayHitResult> closestHitResult;
     Optional<RayHitResult> hitResult;
+    
     for (uint i = 0; i < uniforms.triangleCount; i++)
     {
         Triangle triangle = uniforms.triangleBuf[i];
@@ -58,6 +60,35 @@ public float4 sample(float2 uv, RendererUniform uniforms)
             closestHitResult = hitResult;
         }  
     }
+    
+    for (uint i = 0; i < uniforms.volumeCount; i++)
+    {
+        Volume volume = uniforms.volumeBuf[i];
+        hitResult = volume.hit(ray, uniforms.volumeTexBuf);
+        if (!hitResult.hasValue) {}
+        else if (!closestHitResult.hasValue) {
+            closestHitResult = hitResult;
+        }
+        else if (hitResult.value.t < closestHitResult.value.t) {
+            closestHitResult = hitResult;
+        }  
+    }
+
+    float totalT = ray.tRange.x;
+    for (uint i = 0; i < MAX_STEPS && totalT < ray.tRange.y; i++) {
+        
+        float3 samplePoint = ray.origin + totalT*ray.direction;
+        Tuple<float, float3> sampleResult = uniforms.sdfBuf.sample(samplePoint);
+        totalT += sampleResult._0;
+        if (sampleResult._0 < EPSILON) {
+            if (!closestHitResult.hasValue || totalT < closestHitResult.value.t) {
+                closestHitResult = Optional<RayHitResult>(RayHitResult(totalT, sampleResult._1));
+            }
+            break;
+        }
+    }
+    
+
     if (!closestHitResult.hasValue) {
         return float4(float3(0.0), 1.0);
     }
@@ -91,9 +122,11 @@ public float4 sample(float2 uv, RendererUniform uniforms)
  */
 public float4 render(uint2 tid, RendererUniform uniforms)
 {
-    // TODO: Student implementation starts here.
-
     // Basic version: no supersampling.
+    // float2 uv = (float2(tid) + 0.5) / float2(uniforms.camera.canvasSize);
+    // return sample(uv, uniforms);
+
+    // TODO: Student implementation starts here.
     float4 returnedColor = float4(0);
     float2 uv = float2(0);
     float xOffset, yOffset;
