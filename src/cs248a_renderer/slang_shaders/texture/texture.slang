@@ -46,7 +46,9 @@ public struct SharedTexture3DBuffer<T>
     {
         // TODO: Student implementation starts here.
         
-        uvw = clamp(uvw, float3(0.0), float3(1.0));
+        // Return 0 if any coordinate is out of range
+        if (any(uvw < float3(0.0)) || any(uvw > float3(1.0)))
+            return T(0.0);
         float3 voxelCenter = uvw * float3(tex.size);
         uint3 baseVoxelCoord = uint3(max(float3(0), floor(voxelCenter)));
         float3 t = voxelCenter - float3(baseVoxelCoord);
